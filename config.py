@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from sqlalchemy.pool import NullPool
 
 load_dotenv()
 
@@ -7,6 +8,11 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///tower_docs.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Serverless-friendly engine options (no connection pooling across invocations)
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'poolclass': NullPool,
+    }
     
     # Cloud Storage Configuration
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
@@ -35,6 +41,11 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+    # In production, require DATABASE_URL to be set to avoid falling back to SQLite
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    if not SQLALCHEMY_DATABASE_URI:
+        # Keep a sentinel so app fails early with a helpful message
+        raise RuntimeError('DATABASE_URL is not set. Configure Supabase connection string with ?sslmode=require')
 
 config = {
     'development': DevelopmentConfig,
