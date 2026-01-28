@@ -113,6 +113,7 @@ class TowerDocument(db.Model):
             'is_active': self.is_active
         }
 
+
 # Helper function to check allowed file extensions
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'pdf'}

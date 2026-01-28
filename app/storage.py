@@ -10,7 +10,6 @@ try:
 except Exception:
     cloudinary = None
 
-
 class CloudStorage:
     def __init__(self, app=None):
         self.app = app

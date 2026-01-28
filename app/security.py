@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 import re
 
+
 class SecurityManager:
     """Handle security-related operations"""
     
