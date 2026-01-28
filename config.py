@@ -28,7 +28,7 @@ class Config:
     CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
     CLOUDINARY_FOLDER = os.environ.get('CLOUDINARY_FOLDER', 'tower-docs')
      
-    # Admin Configuration
+    # Admin Configurations
     ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
     
