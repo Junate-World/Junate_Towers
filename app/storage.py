@@ -113,6 +113,8 @@ class CloudStorage:
                 resource_type='raw',
                 folder=folder,
                 public_id=object_name,
+                type='upload',
+                access_mode='public',
                 overwrite=True,
                 use_filename=True,
                 unique_filename=False
