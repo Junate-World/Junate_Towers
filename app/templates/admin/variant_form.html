@@ -21,7 +21,7 @@
 </div>
 
 <div class="bg-white rounded-lg shadow-md p-6">
-    <form method="POST" novalidate>
+    <form method="POST" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag() }}
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -112,6 +112,26 @@
             <p class="mt-1 text-sm text-gray-500">Optional: Special engineering considerations or notes</p>
         </div>
         
+        <!-- Optional Document Upload -->
+        <div class="mb-6 border-t border-gray-200 pt-6">
+            <h3 class="text-lg font-semibold text-engineering-800 mb-3">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Upload PDF (optional)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form.pdf_file.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.pdf_file(class="w-full") }}
+                    <p class="mt-1 text-sm text-gray-500">Only PDF files up to 50MB.</p>
+                </div>
+                <div>
+                    {{ form.version.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.version(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent") }}
+                    <p class="mt-1 text-sm text-gray-500">Version label for this document (e.g., 1.0).</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Form Actions -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200">
             <a href="{{ url_for('admin.variants') }}" 

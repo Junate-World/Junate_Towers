@@ -31,6 +31,9 @@ class VariantForm(FlaskForm):
     load_class = StringField('Load Class')
     engineering_notes = TextAreaField('Engineering Notes')
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
+    # Required document upload during creation
+    pdf_file = FileField('PDF File', validators=[DataRequired()])
+    version = StringField('Version', default='1.0')
     submit = SubmitField('Save Variant')
 
 class DocumentForm(FlaskForm):
@@ -177,19 +180,60 @@ def new_variant():
     form.category_id.choices = [(c.id, c.name) for c in TowerCategory.query.order_by('name').all()]
     
     if form.validate_on_submit():
-        variant = TowerVariant(
-            tower_code=form.tower_code.data,
-            height=form.height.data,
-            structural_type=form.structural_type.data,
-            load_class=form.load_class.data,
-            engineering_notes=form.engineering_notes.data,
-            category_id=form.category_id.data
-        )
-        db.session.add(variant)
-        db.session.commit()
-        flash('Variant created successfully!', 'success')
-        # Redirect straight to upload PDF for this new variant
-        return redirect(url_for('admin.upload_document', variant_id=variant.id))
+        file = form.pdf_file.data
+        # Enforce PDF type before creating variant
+        if not (file and hasattr(file, 'filename') and file.filename and allowed_file(file.filename)):
+            flash('Invalid file type. Please upload a PDF file.', 'error')
+            return render_template('admin/variant_form.html', form=form, title='New Variant')
+
+        try:
+            variant = TowerVariant(
+                tower_code=form.tower_code.data,
+                height=form.height.data,
+                structural_type=form.structural_type.data,
+                load_class=form.load_class.data,
+                engineering_notes=form.engineering_notes.data,
+                category_id=form.category_id.data
+            )
+            db.session.add(variant)
+            # Get variant.id without committing in case upload fails
+            db.session.flush()
+
+            # Extract PDF info (resets stream internally)
+            pdf_info = storage.get_pdf_info(file)
+            # Build filename using tower code and version
+            filename = secure_filename(f"{variant.tower_code}_{(form.version.data or '1.0').strip()}.pdf")
+            # Ensure stream at start for upload
+            try:
+                if hasattr(file, 'stream'):
+                    file.stream.seek(0)
+                else:
+                    file.seek(0)
+            except Exception:
+                pass
+            pdf_url = storage.upload_file(file, filename)
+            if not pdf_url:
+                # Abort creation if upload fails
+                db.session.rollback()
+                flash('There was an error uploading the PDF. Variant was not created.', 'error')
+                return render_template('admin/variant_form.html', form=form, title='New Variant')
+
+            document = TowerDocument(
+                variant_id=variant.id,
+                pdf_url=pdf_url,
+                page_count=pdf_info.get('page_count', 0),
+                file_size=pdf_info.get('file_size', 0),
+                version=(form.version.data or '1.0'),
+                is_active=True
+            )
+            db.session.add(document)
+            db.session.commit()
+            flash('Variant and document uploaded successfully!', 'success')
+            return redirect(url_for('admin.variants'))
+        except Exception as e:
+            db.session.rollback()
+            flash('An unexpected error occurred while creating the variant.', 'error')
+            return render_template('admin/variant_form.html', form=form, title='New Variant')
     
     return render_template('admin/variant_form.html', form=form, title='New Variant')
 
