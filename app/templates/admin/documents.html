@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Documents - Tower Documentation{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-engineering-800 mb-2">Manage Documents</h1>
+    <p class="text-gray-600">PDF technical drawings and specifications</p>
+</div>
+
+<!-- Documents Table -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    {% if documents %}
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tower Code</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pages</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Size</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for document in documents %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="font-medium text-engineering-800">{{ document.variant.tower_code }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('main.category_detail', category_id=document.variant.category.id) }}" 
+                           class="text-engineering-600 hover:text-engineering-800">
+                            {{ document.variant.category.name }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                            v{{ document.version }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                        {{ document.page_count or '-' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                        {% if document.file_size %}
+                        {{ (document.file_size / 1024 / 1024)|round(2) }} MB
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ document.upload_timestamp.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if document.is_active %}
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                            Active
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                            Archived
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <div class="flex space-x-2">
+                            <a href="{{ document.pdf_url }}" 
+                               target="_blank"
+                               class="text-engineering-600 hover:text-engineering-800"
+                               title="View PDF">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ document.pdf_url }}" 
+                               download
+                               class="text-green-600 hover:text-green-800"
+                               title="Download">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <a href="{{ url_for('admin.upload_document', variant_id=document.variant.id) }}" 
+                               class="text-blue-600 hover:text-blue-800"
+                               title="Upload New Version">
+                                <i class="fas fa-upload"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-file-pdf text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Documents Found</h3>
+        <p class="text-gray-500 mb-6">Upload PDF documents for tower variants.</p>
+        <a href="{{ url_for('admin.variants') }}" 
+           class="inline-flex items-center px-6 py-2 bg-engineering-600 text-white rounded-lg hover:bg-engineering-700">
+            <i class="fas fa-cube mr-2"></i>
+            Manage Variants
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Storage Info -->
+<div class="mt-8 bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold text-engineering-800 mb-4">
+        <i class="fas fa-info-circle mr-2"></i>
+        Storage Information
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+            <div class="text-2xl font-bold text-engineering-800">{{ documents|length }}</div>
+            <p class="text-gray-600">Total Documents</p>
+        </div>
+        <div class="text-center">
+            <div class="text-2xl font-bold text-engineering-800">
+                {{ documents|selectattr('is_active')|list|length }}
+            </div>
+            <p class="text-gray-600">Active Documents</p>
+        </div>
+        <div class="text-center">
+            <div class="text-2xl font-bold text-engineering-800">
+                {{ "%.1f"|format((documents|sum(attribute='file_size') / 1024 / 1024)|round(1)) }} MB
+            </div>
+            <p class="text-gray-600">Total Storage Used</p>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Dashboard -->
+<div class="mt-6 text-center">
+    <a href="{{ url_for('admin.dashboard') }}" 
+       class="inline-flex items-center px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back to Dashboard
+    </a>
+</div>
+{% endblock %}

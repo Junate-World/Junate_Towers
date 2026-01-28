@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Junate Tower System{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <nav class="mb-4">
+        <ol class="flex items-center space-x-2 text-sm">
+            <li><a href="{{ url_for('admin.dashboard') }}" class="text-engineering-600 hover:text-engineering-800">Dashboard</a></li>
+            <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+            <li><a href="{{ url_for('admin.sliders') }}" class="text-engineering-600 hover:text-engineering-800">Sliders</a></li>
+            <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+            <li class="text-gray-600">{{ title }}</li>
+        </ol>
+    </nav>
+    
+    <h1 class="text-3xl font-bold text-engineering-800 mb-2">{{ title }}</h1>
+    <p class="text-gray-600">
+        {% if slider %}Edit homepage slider{% else %}Create a new homepage slider{% endif %}
+    </p>
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <!-- Title -->
+        <div class="mb-6">
+            {{ form.title.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            {{ form.title(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent") }}
+            {% if form.title.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.title.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-sm text-gray-500">Main heading displayed on the slider</p>
+        </div>
+        
+        <!-- Description -->
+        <div class="mb-6">
+            {{ form.description.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            {{ form.description(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent", rows="3") }}
+            {% if form.description.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.description.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-sm text-gray-500">Optional: Subtitle or additional information</p>
+        </div>
+        
+        <!-- Image URL -->
+        <div class="mb-6">
+            {{ form.image_url.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            {{ form.image_url(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent", placeholder="https://example.com/image.jpg") }}
+            {% if form.image_url.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.image_url.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-sm text-gray-500">URL to the slider image (recommended: 1920x600px)</p>
+        </div>
+        
+        <!-- Link URL -->
+        <div class="mb-6">
+            {{ form.link_url.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            {{ form.link_url(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent", placeholder="https://example.com/page") }}
+            {% if form.link_url.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.link_url.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-sm text-gray-500">Optional: URL where users are taken when clicking the slider</p>
+        </div>
+        
+        <!-- Preview Section -->
+        {% if form.image_url.data %}
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+            <div class="border-2 border-gray-200 rounded-lg overflow-hidden">
+                <div class="relative">
+                    <img src="{{ form.image_url.data }}" alt="Preview" class="w-full h-48 object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+                        <h3 class="text-lg font-bold">{{ form.title.data or 'Slider Title' }}</h3>
+                        {% if form.description.data %}
+                        <p class="text-sm opacity-90">{{ form.description.data }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Order -->
+            <div class="mb-6">
+                {{ form.order.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                {{ form.order(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent") }}
+                {% if form.order.errors %}
+                    <div class="mt-2 text-sm text-red-600">
+                        {% for error in form.order.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">Lower numbers appear first</p>
+            </div>
+            
+            <!-- Active Status -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <div class="mt-2">
+                    {{ form.is_active(class="h-4 w-4 text-engineering-600 focus:ring-engineering-500 border-gray-300 rounded") }}
+                    {{ form.is_active.label(class="ml-2 block text-sm text-gray-900") }}
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Only active sliders are displayed on the homepage</p>
+            </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+            <a href="{{ url_for('admin.sliders') }}" 
+               class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="fas fa-times mr-2"></i>
+                Cancel
+            </a>
+            <div class="space-x-3">
+                {% if slider %}
+                <a href="{{ url_for('admin.edit_slider', slider_id=slider.id) }}" 
+                   class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-undo mr-2"></i>
+                    Reset
+                </a>
+                {% endif %}
+                {{ form.submit(class="px-6 py-2 bg-engineering-600 text-white rounded-lg hover:bg-engineering-700 transition-colors") }}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Help Section -->
+<div class="mt-8 bg-blue-50 rounded-lg p-6">
+    <h3 class="font-semibold text-blue-800 mb-3">
+        <i class="fas fa-info-circle mr-2"></i>
+        Slider Best Practices
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h4 class="font-medium text-blue-800 mb-2">Content Guidelines</h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>• Use clear, concise titles (under 50 characters)</li>
+                <li>• Keep descriptions brief and impactful</li>
+                <li>• Ensure text is readable over the image background</li>
+                <li>• Link to relevant pages or categories</li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-medium text-blue-800 mb-2">Technical Tips</h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>• Test image URLs before saving</li>
+                <li>• Use HTTPS URLs for better security</li>
+                <li>• Optimize images for web performance</li>
+                <li>• Consider mobile display when designing</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

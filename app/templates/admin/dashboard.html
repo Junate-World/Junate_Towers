@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Tower Documentation{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-engineering-800 mb-2">Admin Dashboard</h1>
+        <p class="text-gray-600">Manage tower documentation system</p>
+    </div>
+    <div class="flex space-x-4">
+        <a href="{{ url_for('main.index') }}" class="text-engineering-600 hover:text-engineering-800">
+            <i class="fas fa-home mr-2"></i>
+            View Site
+        </a>
+        <a href="{{ url_for('admin.logout') }}" class="text-red-600 hover:text-red-800">
+            <i class="fas fa-sign-out-alt mr-2"></i>
+            Logout
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 bg-engineering-100 rounded-full">
+                <i class="fas fa-layer-group text-2xl text-engineering-600"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-2xl font-bold text-engineering-800">{{ categories_count }}</h3>
+                <p class="text-gray-600">Categories</p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ url_for('admin.categories') }}" class="text-engineering-600 hover:text-engineering-800 text-sm font-medium">
+                Manage Categories →
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 bg-engineering-100 rounded-full">
+                <i class="fas fa-cube text-2xl text-engineering-600"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-2xl font-bold text-engineering-800">{{ variants_count }}</h3>
+                <p class="text-gray-600">Variants</p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ url_for('admin.variants') }}" class="text-engineering-600 hover:text-engineering-800 text-sm font-medium">
+                Manage Variants →
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 bg-engineering-100 rounded-full">
+                <i class="fas fa-file-pdf text-2xl text-engineering-600"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-2xl font-bold text-engineering-800">{{ documents_count }}</h3>
+                <p class="text-gray-600">Documents</p>
+            </div>
+        </div>
+        <div class="mt-4">
+            <a href="{{ url_for('admin.documents') }}" class="text-engineering-600 hover:text-engineering-800 text-sm font-medium">
+                Manage Documents →
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h2 class="text-xl font-semibold text-engineering-800 mb-4">
+        <i class="fas fa-plus-circle mr-2"></i>
+        Quick Actions
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <a href="{{ url_for('admin.new_category') }}" 
+           class="flex items-center p-4 bg-engineering-50 rounded-lg hover:bg-engineering-100 transition-colors">
+            <i class="fas fa-plus text-engineering-600 mr-3"></i>
+            <span class="font-medium text-engineering-800">Add Category</span>
+        </a>
+        <a href="{{ url_for('admin.new_variant') }}" 
+           class="flex items-center p-4 bg-engineering-50 rounded-lg hover:bg-engineering-100 transition-colors">
+            <i class="fas fa-plus text-engineering-600 mr-3"></i>
+            <span class="font-medium text-engineering-800">Add Variant</span>
+        </a>
+        <a href="{{ url_for('admin.new_slider') }}" 
+           class="flex items-center p-4 bg-engineering-50 rounded-lg hover:bg-engineering-100 transition-colors">
+            <i class="fas fa-plus text-engineering-600 mr-3"></i>
+            <span class="font-medium text-engineering-800">Add Slider</span>
+        </a>
+        <a href="{{ url_for('main.index') }}" 
+           class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-eye text-gray-600 mr-3"></i>
+            <span class="font-medium text-gray-800">View Site</span>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent Categories -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-engineering-800 mb-4">
+            <i class="fas fa-clock mr-2"></i>
+            Recent Categories
+        </h2>
+        {% if recent_categories %}
+        <div class="space-y-3">
+            {% for category in recent_categories %}
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <div>
+                    <h4 class="font-medium text-engineering-800">{{ category.name }}</h4>
+                    <p class="text-sm text-gray-500">{{ category.created_at.strftime('%Y-%m-%d') }}</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{{ url_for('admin.edit_category', category_id=category.id) }}" 
+                       class="text-engineering-600 hover:text-engineering-800">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ url_for('main.category_detail', category_id=category.id) }}" 
+                       class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">No categories created yet.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Recent Variants -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-engineering-800 mb-4">
+            <i class="fas fa-clock mr-2"></i>
+            Recent Variants
+        </h2>
+        {% if recent_variants %}
+        <div class="space-y-3">
+            {% for variant in recent_variants %}
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <div>
+                    <h4 class="font-medium text-engineering-800">{{ variant.tower_code }}</h4>
+                    <p class="text-sm text-gray-500">{{ variant.category.name }} • {{ variant.height }}m</p>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{{ url_for('admin.edit_variant', variant_id=variant.id) }}" 
+                       class="text-engineering-600 hover:text-engineering-800">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{{ url_for('main.variant_detail', variant_id=variant.id) }}" 
+                       class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">No variants created yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- System Info -->
+<div class="mt-8 bg-blue-50 rounded-lg p-6">
+    <h3 class="font-semibold text-blue-800 mb-3">
+        <i class="fas fa-info-circle mr-2"></i>
+        System Information
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+        <div>
+            <strong>Environment:</strong> {{ 'Development' if config.DEBUG else 'Production' }}
+        </div>
+        <div>
+            <strong>Database:</strong> SQLite (Development)
+        </div>
+        <div>
+            <strong>Storage:</strong> Local (Configure S3/Wasabi for production)
+        </div>
+        <div>
+            <strong>Version:</strong> 1.0.0
+        </div>
+    </div>
+</div>
+{% endblock %}

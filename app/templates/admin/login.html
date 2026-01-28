@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - Tower Documentation{% endblock %}
+
+{% block content %}
+<div class="min-h-full flex items-center justify-center py-12">
+    <div class="max-w-md w-full">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="text-center mb-8">
+                <i class="fas fa-shield-alt text-4xl text-engineering-600 mb-4"></i>
+                <h1 class="text-2xl font-bold text-engineering-800">Admin Login</h1>
+                <p class="text-gray-600 mt-2">Access the administrative interface</p>
+            </div>
+            
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700 border border-red-400{% elif category == 'success' %}bg-green-100 text-green-700 border border-green-400{% else %}bg-blue-100 text-blue-700 border border-blue-400{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-6">
+                    {{ form.username.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.username(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent") }}
+                    {% if form.username.errors %}
+                        <div class="mt-2 text-sm text-red-600">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-6">
+                    {{ form.password.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+                    {{ form.password(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent") }}
+                    {% if form.password.errors %}
+                        <div class="mt-2 text-sm text-red-600">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" 
+                        class="w-full bg-engineering-600 text-white py-2 px-4 rounded-lg hover:bg-engineering-700 transition-colors font-medium">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <a href="{{ url_for('main.index') }}" class="text-engineering-600 hover:text-engineering-800 text-sm">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Back to Public Site
+                </a>
+            </div>
+        </div>
+        
+        <!-- Development Note -->
+        <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="text-sm text-yellow-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                <strong>Development:</strong> Default credentials are admin/admin123
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

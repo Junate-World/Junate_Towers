@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}{{ variant.tower_code }} - Tower Documentation{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm">
+        <li><a href="{{ url_for('main.index') }}" class="text-engineering-600 hover:text-engineering-800">Home</a></li>
+        <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+        <li><a href="{{ url_for('main.category_detail', category_id=variant.category_id) }}" class="text-engineering-600 hover:text-engineering-800">{{ variant.category.name }}</a></li>
+        <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+        <li class="text-gray-600">{{ variant.tower_code }}</li>
+    </ol>
+</nav>
+
+<!-- Variant Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-start">
+        <div>
+            <h1 class="text-3xl font-bold text-engineering-800 mb-2">{{ variant.tower_code }}</h1>
+            <p class="text-lg text-gray-600 mb-4">{{ variant.category.name }}</p>
+            
+            <!-- Variant Specifications -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                <div class="bg-engineering-50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-ruler-vertical text-engineering-600 mr-2"></i>
+                        <span class="text-sm font-medium text-gray-500">Height</span>
+                    </div>
+                    <p class="text-xl font-semibold text-engineering-800">{{ variant.height }}m</p>
+                </div>
+                
+                <div class="bg-engineering-50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-building text-engineering-600 mr-2"></i>
+                        <span class="text-sm font-medium text-gray-500">Structural Type</span>
+                    </div>
+                    <p class="text-xl font-semibold text-engineering-800">{{ variant.structural_type.title() }}</p>
+                </div>
+                
+                <div class="bg-engineering-50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-weight text-engineering-600 mr-2"></i>
+                        <span class="text-sm font-medium text-gray-500">Load Class</span>
+                    </div>
+                    <p class="text-xl font-semibold text-engineering-800">{{ variant.load_class or 'N/A' }}</p>
+                </div>
+                
+                <div class="bg-engineering-50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-file-pdf text-engineering-600 mr-2"></i>
+                        <span class="text-sm font-medium text-gray-500">Documents</span>
+                    </div>
+                    <p class="text-xl font-semibold text-engineering-800">{{ variant.documents.count() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Engineering Notes -->
+    {% if variant.engineering_notes %}
+    <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
+        <h3 class="font-semibold text-blue-800 mb-2">
+            <i class="fas fa-info-circle mr-2"></i>
+            Engineering Notes
+        </h3>
+        <p class="text-blue-700">{{ variant.engineering_notes }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- PDF Document Viewer -->
+{% if document %}
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 bg-engineering-50 border-b border-engineering-200">
+        <div class="flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-engineering-800">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Technical Drawings - Version {{ document.version }}
+            </h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-file mr-1"></i>
+                    {{ document.page_count }} pages
+                </span>
+                <span class="text-sm text-gray-500">
+                    <i class="fas fa-clock mr-1"></i>
+                    {{ document.upload_timestamp.strftime('%Y-%m-%d') }}
+                </span>
+                <a href="{{ document.pdf_url }}" 
+                   target="_blank"
+                   class="inline-flex items-center px-4 py-2 bg-engineering-600 text-white rounded hover:bg-engineering-700 transition-colors">
+                    <i class="fas fa-download mr-2"></i>
+                    Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PDF Viewer -->
+    <div class="p-6">
+        <div class="bg-gray-100 rounded-lg p-4">
+            <iframe src="{{ document.pdf_url }}" 
+                    class="w-full border-0 rounded"
+                    height="800px"
+                    title="Technical Drawings for {{ variant.tower_code }}">
+                <p>Your browser does not support PDF viewing. 
+                   <a href="{{ document.pdf_url }}" target="_blank">Download the PDF</a> to view it.</p>
+            </iframe>
+        </div>
+        
+        <!-- PDF Instructions -->
+        <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+            <h4 class="font-semibold text-yellow-800 mb-2">
+                <i class="fas fa-lightbulb mr-2"></i>
+                PDF Viewer Instructions
+            </h4>
+            <ul class="text-sm text-yellow-700 space-y-1">
+                <li>• Use the scroll bar to navigate through pages</li>
+                <li>• Most browsers support zoom controls (Ctrl +/- or pinch-to-zoom)</li>
+                <li>• Right-click for additional viewing options</li>
+                <li>• Click the Download button for offline viewing</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow-md p-12 text-center">
+    <i class="fas fa-file-pdf text-6xl text-gray-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-600 mb-2">No Technical Drawings Available</h3>
+    <p class="text-gray-500 mb-6">This tower variant doesn't have any PDF documents uploaded yet.</p>
+    <a href="{{ url_for('admin.login') }}" class="inline-block px-6 py-2 bg-engineering-600 text-white rounded-lg hover:bg-engineering-700">
+        <i class="fas fa-upload mr-2"></i>
+        Upload Document
+    </a>
+</div>
+{% endif %}
+
+<!-- Document History -->
+{% if variant.documents.count() > 1 %}
+<div class="mt-8 bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold text-engineering-800 mb-4">
+        <i class="fas fa-history mr-2"></i>
+        Document History
+    </h3>
+    <div class="space-y-2">
+        {% for doc in variant.documents.order_by(TowerDocument.upload_timestamp.desc()) %}
+        <div class="flex justify-between items-center p-3 bg-gray-50 rounded {% if doc.is_active %}border-l-4 border-green-500{% endif %}">
+            <div>
+                <span class="font-medium">Version {{ doc.version }}</span>
+                <span class="text-sm text-gray-500 ml-2">{{ doc.upload_timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% if doc.is_active %}
+                <span class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">Current</span>
+                {% endif %}
+            </div>
+            <div class="text-sm text-gray-500">
+                {{ doc.page_count }} pages • {{ (doc.file_size / 1024 / 1024)|round(2) }} MB
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

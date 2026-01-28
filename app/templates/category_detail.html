@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - Tower Documentation{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="mb-6">
+    <ol class="flex items-center space-x-2 text-sm">
+        <li><a href="{{ url_for('main.index') }}" class="text-engineering-600 hover:text-engineering-800">Home</a></li>
+        <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+        <li class="text-gray-600">{{ category.name }}</li>
+    </ol>
+</nav>
+
+<!-- Category Header -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex items-start justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-engineering-800 mb-3">{{ category.name }}</h1>
+            <p class="text-gray-600">{{ category.description or 'No description available.' }}</p>
+        </div>
+        {% if category.thumbnail_url %}
+        <div class="ml-6">
+            <img src="{{ category.thumbnail_url }}" alt="{{ category.name }}" class="w-32 h-32 object-contain rounded-lg">
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Variants Table -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 bg-engineering-50 border-b border-engineering-200">
+        <h2 class="text-xl font-semibold text-engineering-800">
+            <i class="fas fa-cube mr-2"></i>
+            Available Variants ({{ variants|length }})
+        </h2>
+    </div>
+    
+    {% if variants %}
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tower Code</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Height</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Structural Type</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Load Class</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documents</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for variant in variants %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="font-medium text-engineering-800">{{ variant.tower_code }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-gray-900">{{ variant.height }}m</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-engineering-100 text-engineering-800">
+                            {{ variant.structural_type.title() }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-gray-600">{{ variant.load_class or '-' }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if variant.documents.count() > 0 %}
+                        <span class="text-green-600">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            {{ variant.documents.count() }} file(s)
+                        </span>
+                        {% else %}
+                        <span class="text-gray-400">
+                            <i class="fas fa-file-pdf mr-1"></i>
+                            No documents
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('main.variant_detail', variant_id=variant.id) }}" 
+                           class="inline-flex items-center px-3 py-1 bg-engineering-600 text-white text-sm rounded hover:bg-engineering-700 transition-colors">
+                            <i class="fas fa-eye mr-1"></i>
+                            View Drawings
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-cube text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Variants Found</h3>
+        <p class="text-gray-500">This tower category doesn't have any variants yet.</p>
+        <a href="{{ url_for('admin.login') }}" class="inline-block mt-4 px-6 py-2 bg-engineering-600 text-white rounded-lg hover:bg-engineering-700">
+            <i class="fas fa-plus mr-2"></i>Add Variants
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Engineering Notes Section -->
+{% if variants|selectattr('engineering_notes')|list|length > 0 %}
+<div class="mt-8 bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold text-engineering-800 mb-4">
+        <i class="fas fa-clipboard-list mr-2"></i>
+        Engineering Notes
+    </h3>
+    <div class="space-y-4">
+        {% for variant in variants if variant.engineering_notes %}
+        <div class="border-l-4 border-engineering-400 pl-4">
+            <h4 class="font-medium text-engineering-700">{{ variant.tower_code }}</h4>
+            <p class="text-gray-600 text-sm mt-1">{{ variant.engineering_notes }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

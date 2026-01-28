@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Document - Tower Documentation{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <nav class="mb-4">
+        <ol class="flex items-center space-x-2 text-sm">
+            <li><a href="{{ url_for('admin.dashboard') }}" class="text-engineering-600 hover:text-engineering-800">Dashboard</a></li>
+            <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+            <li><a href="{{ url_for('admin.documents') }}" class="text-engineering-600 hover:text-engineering-800">Documents</a></li>
+            <li><i class="fas fa-chevron-right text-gray-400"></i></li>
+            <li class="text-gray-600">Upload Document</li>
+        </ol>
+    </nav>
+    
+    <h1 class="text-3xl font-bold text-engineering-800 mb-2">Upload Document</h1>
+    <p class="text-gray-600">Upload PDF technical drawings for {{ variant.tower_code }}</p>
+</div>
+
+<!-- Variant Info -->
+<div class="bg-engineering-50 border-l-4 border-engineering-400 p-4 mb-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="font-semibold text-engineering-800">{{ variant.tower_code }}</h3>
+            <p class="text-sm text-engineering-600">
+                {{ variant.category.name }} • {{ variant.height }}m • {{ variant.structural_type.title() }}
+            </p>
+        </div>
+        <a href="{{ url_for('main.variant_detail', variant_id=variant.id) }}" 
+           class="text-engineering-600 hover:text-engineering-800 text-sm">
+            <i class="fas fa-eye mr-1"></i>
+            View Variant
+        </a>
+    </div>
+</div>
+
+<!-- Upload Form -->
+<div class="bg-white rounded-lg shadow-md p-6">
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <!-- File Upload -->
+        <div class="mb-6">
+            {{ form.pdf_file.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-engineering-500 transition-colors">
+                <input type="file" 
+                       id="pdf_file" 
+                       name="pdf_file" 
+                       accept=".pdf"
+                       class="hidden"
+                       onchange="handleFileSelect(this)">
+                <label for="pdf_file" class="cursor-pointer">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                    <p class="text-gray-600 mb-2">Click to select PDF file or drag and drop</p>
+                    <p class="text-sm text-gray-500">PDF files only (Max 50MB)</p>
+                </label>
+                <div id="file-info" class="mt-4 hidden">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                        <span id="file-name" class="text-sm font-medium text-gray-700"></span>
+                        <button type="button" onclick="clearFile()" class="ml-2 text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% if form.pdf_file.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.pdf_file.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Version -->
+        <div class="mb-6">
+            {{ form.version.label(class="block text-sm font-medium text-gray-700 mb-2") }}
+            {{ form.version(class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-engineering-500 focus:border-transparent", placeholder="e.g., 1.0, 2.1, etc.") }}
+            {% if form.version.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.version.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <p class="mt-1 text-sm text-gray-500">Version identifier for this document</p>
+        </div>
+        
+        <!-- Warning about existing documents -->
+        {% if variant.documents.count() > 0 %}
+        <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+            <h4 class="font-semibold text-yellow-800 mb-2">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                Existing Documents Found
+            </h4>
+            <p class="text-sm text-yellow-700 mb-2">
+                This variant already has {{ variant.documents.count() }} document(s). Uploading a new document will:
+            </p>
+            <ul class="text-sm text-yellow-700 list-disc list-inside">
+                <li>Archive all existing documents (they won't be deleted)</li>
+                <li>Make the new document the active version</li>
+                <li>Preserve document history for reference</li>
+            </ul>
+        </div>
+        {% endif %}
+        
+        <!-- Form Actions -->
+        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+            <a href="{{ url_for('admin.documents') }}" 
+               class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                <i class="fas fa-times mr-2"></i>
+                Cancel
+            </a>
+            {{ form.submit(class="px-6 py-2 bg-engineering-600 text-white rounded-lg hover:bg-engineering-700 transition-colors", disabled="true", id="submit-btn") }}
+        </div>
+    </form>
+</div>
+
+<!-- Help Section -->
+<div class="mt-8 bg-blue-50 rounded-lg p-6">
+    <h3 class="font-semibold text-blue-800 mb-3">
+        <i class="fas fa-info-circle mr-2"></i>
+        Upload Guidelines
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h4 class="font-medium text-blue-800 mb-2">File Requirements</h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>• PDF format only</li>
+                <li>• Maximum file size: 50MB</li>
+                <li>• Multi-page technical drawings preferred</li>
+                <li>• Clear, readable engineering drawings</li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-medium text-blue-800 mb-2">Version Control</h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>• Use semantic versioning (1.0, 1.1, 2.0)</li>
+                <li>• Each upload creates a new version</li>
+                <li>• Previous versions are archived automatically</li>
+                <li>• Only the latest version is displayed to users</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) {
+        // Check file type
+        if (file.type !== 'application/pdf') {
+            alert('Please select a PDF file.');
+            input.value = '';
+            return;
+        }
+        
+        // Check file size (50MB)
+        if (file.size > 50 * 1024 * 1024) {
+            alert('File size must be less than 50MB.');
+            input.value = '';
+            return;
+        }
+        
+        // Show file info
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-info').classList.remove('hidden');
+        document.getElementById('submit-btn').disabled = false;
+    }
+}
+
+function clearFile() {
+    document.getElementById('pdf_file').value = '';
+    document.getElementById('file-info').classList.add('hidden');
+    document.getElementById('submit-btn').disabled = true;
+}
+
+// Drag and drop functionality
+const dropZone = document.querySelector('label[for="pdf_file"]').parentElement;
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('border-engineering-500', 'bg-engineering-50');
+});
+
+dropZone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-engineering-500', 'bg-engineering-50');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('border-engineering-500', 'bg-engineering-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('pdf_file').files = files;
+        handleFileSelect(document.getElementById('pdf_file'));
+    }
+});
+</script>
+{% endblock %}
