@@ -31,8 +31,8 @@ class VariantForm(FlaskForm):
     load_class = StringField('Load Class')
     engineering_notes = TextAreaField('Engineering Notes')
     category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
-    # Required document upload during creation
-    pdf_file = FileField('PDF File', validators=[DataRequired()])
+    # Document file (required on create, optional on edit; enforced in routes)
+    pdf_file = FileField('PDF File')
     version = StringField('Version', default='1.0')
     submit = SubmitField('Save Variant')
 
@@ -252,6 +252,42 @@ def edit_variant(variant_id):
         variant.load_class = form.load_class.data
         variant.engineering_notes = form.engineering_notes.data
         variant.category_id = form.category_id.data
+        
+        # Handle optional PDF replacement
+        file = form.pdf_file.data
+        if file and hasattr(file, 'filename') and file.filename:
+            if not allowed_file(file.filename):
+                flash('Invalid file type. Please upload a PDF file.', 'error')
+                return render_template('admin/variant_form.html', form=form, variant=variant, title='Edit Variant')
+            # Deactivate existing documents
+            TowerDocument.query.filter_by(variant_id=variant.id).update({'is_active': False})
+            # Extract PDF info
+            pdf_info = storage.get_pdf_info(file)
+            # Build filename
+            filename = secure_filename(f"{variant.tower_code}_{(form.version.data or '1.0').strip()}.pdf")
+            # Reset stream before upload
+            try:
+                if hasattr(file, 'stream'):
+                    file.stream.seek(0)
+                else:
+                    file.seek(0)
+            except Exception:
+                pass
+            pdf_url = storage.upload_file(file, filename)
+            if not pdf_url:
+                db.session.rollback()
+                flash('There was an error uploading the PDF. Changes not saved.', 'error')
+                return render_template('admin/variant_form.html', form=form, variant=variant, title='Edit Variant')
+            document = TowerDocument(
+                variant_id=variant.id,
+                pdf_url=pdf_url,
+                page_count=pdf_info.get('page_count', 0),
+                file_size=pdf_info.get('file_size', 0),
+                version=(form.version.data or '1.0'),
+                is_active=True
+            )
+            db.session.add(document)
+        
         db.session.commit()
         flash('Variant updated successfully!', 'success')
         return redirect(url_for('admin.variants'))
