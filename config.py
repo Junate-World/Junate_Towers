@@ -47,7 +47,6 @@ class ProductionConfig(Config):
         # Keep a sentinel so app fails early with a helpful message
         raise RuntimeError('DATABASE_URL is not set. Configure Supabase connection string with ?sslmode=require')
 
-
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
