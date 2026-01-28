@@ -21,10 +21,10 @@ class Config:
     CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
     CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
     CLOUDINARY_FOLDER = os.environ.get('CLOUDINARY_FOLDER', 'tower-docs')
-    
+     
     # Admin Configuration
-    ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
     
     # Upload Configuration
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max file size
