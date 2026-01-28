@@ -53,6 +53,10 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('main.about') }}" class="text-white hover:text-gray-300 transition">
+                        <i class="fas fa-user"></i>
+                        <span class="ml-1 hidden md:inline">About</span>
+                    </a>
                     <!-- Search -->
                     <form action="{{ url_for('main.search') }}" method="GET" class="hidden md:block">
                         <div class="relative">

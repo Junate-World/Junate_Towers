@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}About - Junate Towers{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Banner with author image overlay -->
+    <div class="relative rounded-xl overflow-hidden shadow-lg">
+        <img src="{{ contact.banner_image }}" alt="Contact banner" class="w-full h-64 object-cover">
+        <div class="absolute -bottom-10 left-6">
+            <img src="{{ author.image_url }}" alt="Author photo" class="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover">
+        </div>
+    </div>
+
+    <div class="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Author -->
+        <div class="md:col-span-2 bg-white rounded-xl p-6 shadow">
+            <h1 class="text-3xl font-bold text-engineering-800 mb-2">About {{ author.name }}</h1>
+            <p class="text-gray-600 mb-6">{{ author.role }}</p>
+            <p class="text-gray-700 leading-relaxed">
+                We design, document, and manage robust tower infrastructure tailored to your project needs. Our
+                engineering catalog streamlines access to technical drawings, variant specifications, and compliant
+                documentation—so your teams can move faster with confidence.
+            </p>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-white rounded-xl p-6 shadow">
+            <h2 class="text-xl font-semibold text-engineering-800 mb-4">Contact</h2>
+            <ul class="space-y-2 text-gray-700">
+                <li><i class="fas fa-envelope mr-2 text-engineering-600"></i>{{ contact.email }}</li>
+                <li><i class="fas fa-phone mr-2 text-engineering-600"></i>{{ contact.phone }}</li>
+                <li><i class="fas fa-location-dot mr-2 text-engineering-600"></i>{{ contact.address }}</li>
+            </ul>
+            <a href="mailto:{{ contact.email }}" class="inline-block mt-4 px-4 py-2 bg-engineering-600 text-white rounded hover:bg-engineering-700">Email Us</a>
+        </div>
+    </div>
+
+    <!-- Services -->
+    <div class="bg-white rounded-xl p-6 shadow">
+        <h2 class="text-2xl font-semibold text-engineering-800 mb-4">Our Services</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for svc in services %}
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-check text-green-600 mt-1"></i>
+                <span class="text-gray-800">{{ svc }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

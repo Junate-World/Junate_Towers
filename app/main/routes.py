@@ -82,3 +82,26 @@ def not_found_error(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# About page
+@bp.route('/about')
+def about():
+    author = {
+        'name': 'Abel Abel',
+        'role': 'Author & Lead Specialist',
+        'image_url': url_for('static', filename='images/author.jpg')
+    }
+    contact = {
+        'email': 'abel.ogbonna@yahoo.com',
+        'phone': '+234 903 873 2209',
+        'address': 'Lagos, Nigeria',
+        'banner_image': url_for('static', filename='images/contact.jpg')
+    }
+    services = [
+        'Telecom Tower Audit',
+        'Structural Analysis Audit',
+        'CAD Drafting',
+        'Project Management [Relocation, Infra Work, Decommission and Retrieval tasks]',
+        'NQA [Grid, RFI, Solar, RMS & Power] Audit'
+    ]
+    return render_template('about.html', author=author, contact=contact, services=services)
