@@ -112,7 +112,7 @@ class CloudStorage:
                 file,
                 resource_type='raw',
                 folder=folder,
-                public_id=os.path.splitext(object_name)[0],
+                public_id=object_name,
                 overwrite=True,
                 use_filename=True,
                 unique_filename=False
