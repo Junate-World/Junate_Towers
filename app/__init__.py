@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import config
@@ -8,7 +9,9 @@ db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app(config_name='default'):
-    app = Flask(__name__)
+    # Use a writable instance path (Vercel is read-only except /tmp)
+    instance_path = os.environ.get('INSTANCE_PATH', '/tmp')
+    app = Flask(__name__, instance_path=instance_path)
     app.config.from_object(config[config_name])
     
     db.init_app(app)
