@@ -55,10 +55,11 @@
                         <span class="text-gray-600">{{ variant.load_class or '-' }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        {% if variant.documents.count() > 0 %}
+                        {% set doc_count = variant.documents.count() %}
+                        {% if doc_count > 0 %}
                         <span class="text-green-600">
                             <i class="fas fa-file-pdf mr-1"></i>
-                            {{ variant.documents.count() }}
+                            {{ doc_count }}
                         </span>
                         {% else %}
                         <span class="text-gray-400">
@@ -79,13 +80,11 @@
                                title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            {% if variant.documents.count() > 0 %}
                             <a href="{{ url_for('admin.upload_document', variant_id=variant.id) }}" 
                                class="text-green-600 hover:text-green-800"
                                title="Upload/Replace Document">
-                                <i class="fas fa-file-pdf"></i>
+                                <i class="fas fa-file-upload"></i>
                             </a>
-                            {% endif %}
                             <form method="POST" 
                                   action="{{ url_for('admin.delete_variant', variant_id=variant.id) }}" 
                                   class="inline"

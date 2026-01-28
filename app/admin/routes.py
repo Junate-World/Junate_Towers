@@ -54,7 +54,8 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'admin_logged_in' not in session:
             flash('You must be logged in to access this page.', 'error')
-            return redirect(url_for('admin.login'))
+            # Preserve intended destination
+            return redirect(url_for('admin.login', next=request.full_path))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -62,6 +63,7 @@ def admin_required(f):
 def login():
     """Form-based admin login"""
     form = LoginForm()
+    next_url = request.args.get('next') or request.form.get('next')
     
     if form.validate_on_submit():
         username = form.username.data
@@ -72,11 +74,14 @@ def login():
             session['admin_logged_in'] = True
             session.permanent = True
             flash('Login successful!', 'success')
+            # Redirect to original destination if provided and safe
+            if next_url and not next_url.startswith(('http://', 'https://')):
+                return redirect(next_url)
             return redirect(url_for('admin.dashboard'))
         else:
             flash('Invalid username or password. Please try again.', 'error')
     
-    return render_template('admin/login.html', form=form)
+    return render_template('admin/login.html', form=form, next_url=next_url)
 
 @bp.route('/logout')
 def logout():
@@ -183,7 +188,8 @@ def new_variant():
         db.session.add(variant)
         db.session.commit()
         flash('Variant created successfully!', 'success')
-        return redirect(url_for('admin.variants'))
+        # Redirect straight to upload PDF for this new variant
+        return redirect(url_for('admin.upload_document', variant_id=variant.id))
     
     return render_template('admin/variant_form.html', form=form, title='New Variant')
 
