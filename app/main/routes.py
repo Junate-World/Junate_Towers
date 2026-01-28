@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, current_app
+from flask import render_template, request, redirect, url_for, flash, current_app, jsonify
 from app.main import bp
 from app.models import TowerCategory, TowerVariant, TowerDocument, Slider
 from app import db
@@ -21,6 +21,28 @@ def category_detail(category_id):
                                 .all()
     return render_template('category_detail.html', category=category, variants=variants)
 
+@bp.route('/health')
+def health():
+    """Lightweight health check for uptime monitors."""
+    status = {
+        'app': 'ok',
+        'db': 'unknown',
+        'cloudinary_configured': False,
+    }
+    # DB check
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        status['db'] = 'ok'
+    except Exception as e:
+        status['db'] = f'error: {type(e).__name__}'
+    # Cloudinary config presence (no outbound call)
+    try:
+        from app.storage import cloudinary as _cloud
+        cfg = getattr(_cloud, 'config', None)
+        status['cloudinary_configured'] = bool(cfg and cfg().cloud_name)
+    except Exception:
+        status['cloudinary_configured'] = False
+    return jsonify(status), 200 if status['db'] == 'ok' else 503
 @bp.route('/variant/<int:variant_id>')
 def variant_detail(variant_id):
     """Tower variant detail page - Display variant info and PDF"""
