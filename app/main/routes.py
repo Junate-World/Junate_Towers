@@ -87,7 +87,7 @@ def internal_error(error):
 @bp.route('/about')
 def about():
     author = {
-        'name': 'Abel Abel',
+        'name': 'Abel Ogbonna',
         'role': 'Author & Lead Specialist',
         'image_url': url_for('static', filename='images/author.jpg')
     }
