@@ -95,7 +95,7 @@ def about():
         'email': 'abel.ogbonna@yahoo.com',
         'phone': '+234 903 873 2209',
         'address': 'Lagos, Nigeria',
-        'banner_image': url_for('static', filename='images/contact.jpg')
+        'banner_image': url_for('static', filename='images/contact.JPG')
     }
     services = [
         'Telecom Tower Audit',
