@@ -1,6 +1,6 @@
-from flask import render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask import render_template, request, redirect, url_for, flash, current_app, jsonify, session
 from app.main import bp
-from app.models import TowerCategory, TowerVariant, TowerDocument, Slider
+from app.models import TowerCategory, TowerVariant, TowerDocument, Slider, VisitorStat
 from app import db
 
 @bp.route('/')
@@ -82,6 +82,39 @@ def not_found_error(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# Count unique session visits across the public site
+@bp.before_app_request
+def _count_visits_once_per_session():
+    try:
+        # Skip admin routes and static files
+        if request.endpoint and (request.endpoint.startswith('admin.') or request.endpoint.startswith('static')):
+            return
+    except Exception:
+        pass
+    if not session.get('visitor_counted'):
+        try:
+            stat = VisitorStat.query.first()
+            if not stat:
+                stat = VisitorStat(total_count=0)
+                db.session.add(stat)
+            stat.total_count += 1
+            stat.last_visit = db.func.now()
+            db.session.commit()
+            session['visitor_counted'] = True
+        except Exception:
+            db.session.rollback()
+            # Do not block the request if counter fails
+            pass
+
+# Expose visitor total in templates rendered via this blueprint
+@bp.app_context_processor
+def inject_visitor_total():
+    try:
+        stat = VisitorStat.query.first()
+        return {'visitor_total': stat.total_count if stat else 0}
+    except Exception:
+        return {'visitor_total': 0}
 
 # About page
 @bp.route('/about')

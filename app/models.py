@@ -28,6 +28,17 @@ class Slider(db.Model):
             'is_active': self.is_active
         }
 
+# Visitor statistics
+class VisitorStat(db.Model):
+    __tablename__ = 'visitor_stats'
+
+    id = db.Column(db.Integer, primary_key=True)
+    total_count = db.Column(db.Integer, default=0, nullable=False)
+    last_visit = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<VisitorStat total={self.total_count}>'
+
 class TowerCategory(db.Model):
     __tablename__ = 'tower_categories'
     
