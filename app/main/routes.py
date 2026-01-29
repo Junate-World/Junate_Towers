@@ -101,7 +101,8 @@ def about():
         'Telecom Tower Audit',
         'Structural Analysis Audit',
         'CAD Drafting',
+        'NQA [Grid, RFI, Solar, RMS & Power] Audit',
         'Project Management [Relocation, Infra Work, Decommission and Retrieval tasks]',
-        'NQA [Grid, RFI, Solar, RMS & Power] Audit'
+        'TelecomTower Maintenance'
     ]
     return render_template('about.html', author=author, contact=contact, services=services)
